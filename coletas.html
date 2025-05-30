@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minhas Coletas</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #FFFFFF; padding: 20px; }
+    h1 { color: #2196F3; }
+    p.descricao { font-size: 16px; color: #333; margin-top: -10px; margin-bottom: 20px; }
+    .filtro { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #E0E0E0; }
+  </style>
+</head>
+<body>
+  <h1>Minhas Coletas</h1>
+  <p class="descricao">Aqui estão listadas todas as coletas realizadas pela ONG Unidos pelo Bem em sua empresa. Acompanhe o status e o histórico das coletas realizadas.</p>
+
+  <div class="filtro">
+    <label for="status">Filtrar por status: </label>
+    <select id="status" onchange="filtrarStatus()">
+      <option value="todos">Todos</option>
+      <option value="pendente">Pendente</option>
+      <option value="confirmado">Confirmado</option>
+      <option value="finalizado">Finalizado</option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Endereço</th>
+        <th>Itens</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-coletas">
+    </tbody>
+  </table>
+
+  <script>
+    const coletas = [
+      { data: "10/05/2025", endereco: "Rua das Laranjeiras, 45", itens: "Papelão, Plástico", status: "confirmado" },
+      { data: "18/05/2025", endereco: "Av. São João, 88", itens: "Eletrônicos", status: "finalizado" },
+      { data: "25/05/2025", endereco: "Rua Verde, 123", itens: "Vidros", status: "pendente" },
+      { data: "28/05/2025", endereco: "Rua Azul, 77", itens: "Papel, Metal", status: "confirmado" },
+      { data: "29/05/2025", endereco: "Av. Central, 200", itens: "Lâmpadas", status: "finalizado" },
+      { data: "30/05/2025", endereco: "Rua Amarela, 321", itens: "Baterias, Pilhas", status: "pendente" }
+    ];
+
+    function renderTabela(statusFiltro = "todos") {
+      const tbody = document.getElementById("tabela-coletas");
+      tbody.innerHTML = "";
+      coletas.forEach(coleta => {
+        if (statusFiltro === "todos" || coleta.status === statusFiltro) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${coleta.data}</td>
+            <td>${coleta.endereco}</td>
+            <td>${coleta.itens}</td>
+            <td>${coleta.status.charAt(0).toUpperCase() + coleta.status.slice(1)}</td>
+          `;
+          tbody.appendChild(row);
+        }
+      });
+    }
+
+    function filtrarStatus() {
+      const status = document.getElementById("status").value;
+      renderTabela(status);
+    }
+
+    renderTabela();
+  </script>
+</body>
+</html>
