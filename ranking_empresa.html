@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking de Impacto</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #FFFFFF; padding: 20px; }
+    h1 { color: #4CAF50; }
+    .descricao { font-size: 16px; color: #333; margin-bottom: 20px; }
+    .filtros { margin-bottom: 20px; }
+    select { padding: 5px; margin-right: 10px; }
+    canvas { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>Ranking de Impacto</h1>
+  <p class="descricao">Esta tela apresenta o impacto ambiental e financeiro gerado pelas doações realizadas pela sua empresa para a ONG Unidos pelo Bem. Use os filtros para explorar os dados por período e tipo de impacto.</p>
+
+  <div class="filtros">
+    <label for="periodo">Período: </label>
+    <select id="periodo" onchange="atualizarGraficos()">
+      <option value="2025">Ano 2025</option>
+      <option value="2024">Ano 2024</option>
+    </select>
+  </div>
+
+  <h3>Impacto Financeiro Positivo para a ONG</h3>
+  <canvas id="graficoFinanceiro"></canvas>
+
+  <h3>Impacto Positivo no Meio Ambiente</h3>
+  <canvas id="graficoAmbiental"></canvas>
+
+  <script>
+    const dados = {
+      2024: {
+        meses: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+        financeiro: [1000, 800, 1200, 950, 1300, 1100, 1400, 1250, 1500, 1600, 1550, 1700],
+        ambiental: [150, 120, 180, 160, 200, 170, 210, 190, 230, 240, 235, 260] // Kg reciclados
+      },
+      2025: {
+        meses: ["Jan", "Fev", "Mar", "Abr", "Mai"],
+        financeiro: [1800, 1700, 1900, 2100, 2200],
+        ambiental: [250, 240, 260, 270, 300]
+      }
+    };
+
+    let graficoFinanceiro, graficoAmbiental;
+
+    function criarGraficos(periodo) {
+      const ctxFinanceiro = document.getElementById("graficoFinanceiro").getContext("2d");
+      const ctxAmbiental = document.getElementById("graficoAmbiental").getContext("2d");
+
+      if (graficoFinanceiro) graficoFinanceiro.destroy();
+      if (graficoAmbiental) graficoAmbiental.destroy();
+
+      graficoFinanceiro = new Chart(ctxFinanceiro, {
+        type: "bar",
+        data: {
+          labels: dados[periodo].meses,
+          datasets: [{
+            label: "Reais (R$)",
+            data: dados[periodo].financeiro,
+            backgroundColor: "#2196F3"
+          }]
+        },
+        options: { responsive: true }
+      });
+
+      graficoAmbiental = new Chart(ctxAmbiental, {
+        type: "line",
+        data: {
+          labels: dados[periodo].meses,
+          datasets: [{
+            label: "Resíduos reciclados (kg)",
+            data: dados[periodo].ambiental,
+            backgroundColor: "#4CAF50",
+            borderColor: "#4CAF50",
+            fill: false
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    function atualizarGraficos() {
+      const periodo = document.getElementById("periodo").value;
+      criarGraficos(periodo);
+    }
+
+    atualizarGraficos();
+  </script>
+</body>
+</html>
