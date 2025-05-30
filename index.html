@@ -54,20 +54,29 @@
 <script>
   let map, marker;
 
-  const destino = { lat: -23.6553023, lng: -46.7132425 }; // UNINOVE Santo Amaro
+  const enderecoTexto = "UNINOVE - Campus Santo Amaro, R. Amador Bueno, 389 - Santo Amaro, São Paulo - SP, 04752-900";
 
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-      center: destino,
-      zoom: 15,
+      center: { lat: -23.5505, lng: -46.6333 }, // centro SP temporário
+      zoom: 13,
     });
 
-    // Marcador fixo da UNINOVE
-    marker = new google.maps.Marker({
-      position: destino,
-      map: map,
-      title: "Ponto de Coleta - UNINOVE Santo Amaro",
-      icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+    // Geocodifica o endereço para colocar o marcador
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: enderecoTexto }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        map.setCenter(results[0].geometry.location);
+        map.setZoom(15);
+        marker = new google.maps.Marker({
+          map: map,
+          position: results[0].geometry.location,
+          title: "Ponto de Coleta - UNINOVE Santo Amaro",
+          icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+        });
+      } else {
+        alert("Não foi possível localizar o endereço do ponto de coleta.");
+      }
     });
 
     // Autocomplete
@@ -87,8 +96,8 @@
   }
 
   function openGPS() {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${destino.lat},${destino.lng}&travelmode=driving`;
-    window.open(url, "_blank");
+    // Abre o link direto do Google Maps fornecido
+    window.open("https://maps.app.goo.gl/cpXAJZ9QUZ9ZTPsm7", "_blank");
   }
 </script>
 
