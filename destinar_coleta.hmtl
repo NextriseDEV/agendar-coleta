@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Destinar à ONG - Unidos pelo Bem</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #FFFFFF; padding: 20px; }
+    h1 { color: #4CAF50; }
+    .filtro { margin-bottom: 20px; }
+    .item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Destinar à ONG - Unidos pelo Bem</h1>
+
+  <div class="filtro">
+    <label for="statusFiltro">Filtrar por status: </label>
+    <select id="statusFiltro" onchange="filtrarItens()">
+      <option value="todos">Todos</option>
+      <option value="disponivel">A Destinar</option>
+      <option value="destinado">Destinados</option>
+    </select>
+  </div>
+
+  <div id="lista-itens"></div>
+
+  <script>
+    const itens = [
+      { nome: "Papel e Papelão", quantidade: "15kg", status: "disponivel" },
+      { nome: "Aparelhos eletrônicos", quantidade: "8 unidades", status: "disponivel" },
+      { nome: "Garrafas PET", quantidade: "30 unidades", status: "disponivel" },
+    ];
+
+    function renderLista(filtro = "todos") {
+      const container = document.getElementById("lista-itens");
+      container.innerHTML = "";
+      itens.forEach((item, index) => {
+        if (filtro === "todos" || item.status === filtro) {
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <strong>Item:</strong> ${item.nome}<br>
+            <strong>Quantidade:</strong> ${item.quantidade}<br>
+            <strong>Status:</strong> ${item.status === "disponivel" ? "Disponível" : "Destinado"}<br>
+            ${item.status === "disponivel" ? `<button onclick="destinar(${index})">Destinar</button>` : ""}
+          `;
+          container.appendChild(div);
+        }
+      });
+    }
+
+    function destinar(index) {
+      itens[index].status = "destinado";
+      renderLista(document.getElementById("statusFiltro").value);
+    }
+
+    function filtrarItens() {
+      const status = document.getElementById("statusFiltro").value;
+      renderLista(status);
+    }
+
+    renderLista();
+  </script>
+</body>
+</html>
