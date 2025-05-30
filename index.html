@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Rota até Ponto de Coleta</title>
+  <title>Mapa - Ponto de Coleta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
@@ -11,27 +11,29 @@
       font-family: Arial, sans-serif;
     }
     #map {
-      height: 90%;
+      height: calc(100% - 120px);
       width: 100%;
-    }
-    #info {
-      padding: 10px;
-      background-color: #f0f0f0;
-      font-size: 16px;
-      text-align: center;
     }
     #controls {
       padding: 10px;
-      text-align: center;
-      background: #ffffff;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      box-sizing: border-box;
     }
     button {
-      padding: 10px 20px;
+      padding: 12px;
       font-size: 16px;
       background-color: #2196F3;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
     }
     button:hover {
@@ -41,15 +43,18 @@
 </head>
 <body>
 
-<div id="info">Calculando rota...</div>
-<div id="map"></div>
 <div id="controls">
-  <button onclick="calculateRoute()">Recalcular Rota</button>
+  <input id="search-box" type="text" placeholder="Buscar endereço...">
+  <button onclick="openGPS()">Navegar até o ponto de coleta</button>
+  <button onclick="window.location.href='https://form.jotform.com/251494952105660'">Agendar Coleta</button>
 </div>
 
+<div id="map"></div>
+
 <script>
-  const destino = { lat: -23.1905381, lng: -46.8854512 }; // Ponto fixo
-  let map, directionsService, directionsRenderer;
+  let map, marker;
+
+  const destino = { lat: -23.6553023, lng: -46.7132425 }; // UNINOVE Santo Amaro
 
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
@@ -57,55 +62,39 @@
       zoom: 15,
     });
 
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+    // Marcador fixo da UNINOVE
+    marker = new google.maps.Marker({
+      position: destino,
+      map: map,
+      title: "Ponto de Coleta - UNINOVE Santo Amaro",
+      icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+    });
 
-    calculateRoute(); // Primeira rota
+    // Autocomplete
+    const input = document.getElementById("search-box");
+    const autocomplete = new google.maps.places.Autocomplete(input);
+    autocomplete.bindTo("bounds", map);
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (!place.geometry || !place.geometry.location) {
+        alert("Endereço não encontrado.");
+        return;
+      }
+      map.panTo(place.geometry.location);
+      map.setZoom(15);
+    });
   }
 
-  function calculateRoute() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const origem = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-
-          directionsService.route(
-            {
-              origin: origem,
-              destination: destino,
-              travelMode: google.maps.TravelMode.DRIVING
-            },
-            (response, status) => {
-              if (status === "OK") {
-                directionsRenderer.setDirections(response);
-
-                // Mostrar tempo e distância
-                const leg = response.routes[0].legs[0];
-                document.getElementById("info").innerHTML =
-                  `Distância: ${leg.distance.text} | Tempo estimado: ${leg.duration.text}`;
-              } else {
-                document.getElementById("info").innerHTML =
-                  "Não foi possível calcular a rota.";
-              }
-            }
-          );
-        },
-        () => {
-          alert("Erro ao obter sua localização.");
-        }
-      );
-    } else {
-      alert("Seu navegador não suporta geolocalização.");
-    }
+  function openGPS() {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${destino.lat},${destino.lng}&travelmode=driving`;
+    window.open(url, "_blank");
   }
 </script>
 
 <!-- 👇 Substitua SUA_API_KEY pela sua chave real -->
 <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnwhcqJTdCSNWRhhF5MJnkqyOOKOveeKk&callback=initMap">
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnwhcqJTdCSNWRhhF5MJnkqyOOKOveeKk&libraries=places&callback=initMap">
 </script>
 
 </body>
