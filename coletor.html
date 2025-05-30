@@ -1,80 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Painel do Coletor</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-
-    h1 {
-      color: #333;
-    }
-
-    .filtro {
-      margin-bottom: 20px;
-    }
-
-    .tabela-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
-    }
-
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-
-    button {
-      padding: 6px 12px;
-      margin: 2px 2px;
-      cursor: pointer;
-    }
-
-    @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-
-      thead tr {
-        display: none;
-      }
-
-      tr {
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        padding: 10px;
-        border-radius: 10px;
-      }
-
-      td {
-        border: none;
-        padding: 5px 10px;
-        position: relative;
-      }
-
-      td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-        color: #555;
-      }
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    .filtro { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    button { padding: 6px 12px; margin-right: 5px; cursor: pointer; }
   </style>
 </head>
 <body>
-
-  <h1>Painel de Coletor</h1>
+  <h1>Painel do Coletor</h1>
 
   <div class="filtro">
     <label for="status">Filtrar por status: </label>
@@ -86,28 +26,51 @@
     </select>
   </div>
 
-  <div class="tabela-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Endereço</th>
-          <th>Itens</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="lista-coletas"></tbody>
-    </table>
-  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Telefone</th>
+        <th>Item</th>
+        <th>Data</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="lista-coletas"></tbody>
+  </table>
 
   <script>
-    const coletas = [
-      { nome: "João Silva", endereco: "Rua das Flores, 123", itens: "Papel, Plástico", status: "pendente" },
-      { nome: "Maria Oliveira", endereco: "Av. Brasil, 45", itens: "Vidro", status: "confirmado" },
-      { nome: "Carlos Pereira", endereco: "Rua A, 10", itens: "Metal", status: "pendente" },
-      { nome: "Ana Costa", endereco: "Rua B, 999", itens: "Eletrônicos", status: "finalizado" },
-    ];
+    // Token da API JotForm (coloque seu token válido aqui)
+    const API_TOKEN = "b1188e88559be7d655b1e7ce92596626I";
+
+    // ID da tabela JotForm
+    const TABLE_ID = "251494952105660";
+
+    // Array local para manter estado das coletas (status)
+    let coletas = [];
+
+    async function fetchColetas() {
+      try {
+        const response = await fetch(`https://api.jotform.com/table/${TABLE_ID}/rows?apiKey=${API_TOKEN}`);
+        const data = await response.json();
+
+        // data.content é um array de objetos, cada um com um fields object (colunas)
+        coletas = data.content.map(row => ({
+          id: row.id,
+          nome: row.cells['nome']?.text || 'Sem nome',
+          telefone: row.cells['telefone']?.text || 'Sem telefone',
+          item: row.cells['item']?.text || 'Sem item',
+          data: row.cells['data']?.text || 'Sem data',
+          status: "pendente" // status inicial default, pode ajustar se quiser
+        }));
+
+        renderLista();
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+        alert("Falha ao carregar dados da tabela.");
+      }
+    }
 
     function renderLista(statusFiltro = "todos") {
       const tbody = document.getElementById("lista-coletas");
@@ -116,11 +79,12 @@
         if (statusFiltro === "todos" || coleta.status === statusFiltro) {
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td data-label="Nome">${coleta.nome}</td>
-            <td data-label="Endereço">${coleta.endereco}</td>
-            <td data-label="Itens">${coleta.itens}</td>
-            <td data-label="Status">${coleta.status}</td>
-            <td data-label="Ações">
+            <td>${coleta.nome}</td>
+            <td>${coleta.telefone}</td>
+            <td>${coleta.item}</td>
+            <td>${coleta.data}</td>
+            <td>${coleta.status}</td>
+            <td>
               <button onclick="confirmar(${index})">Confirmar</button>
               <button onclick="finalizar(${index})">Finalizar</button>
             </td>
@@ -145,7 +109,8 @@
       filtrarStatus();
     }
 
-    renderLista();
+    // Ao carregar a página, busca os dados da tabela
+    fetchColetas();
   </script>
 </body>
 </html>
