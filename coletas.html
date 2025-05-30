@@ -8,31 +8,67 @@
     body { font-family: Arial, sans-serif; background: #FFFFFF; padding: 20px; }
     h1 { color: #2196F3; }
     p.descricao { font-size: 16px; color: #333; margin-top: -10px; margin-bottom: 20px; }
-    .filtro { margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .filtros { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    @media (min-width: 600px) {
+      .filtros { flex-direction: row; align-items: center; }
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
     th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
     th { background-color: #E0E0E0; }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead tr { display: none; }
+      td { position: relative; padding-left: 50%; margin-bottom: 10px; border: none; border-bottom: 1px solid #ccc; }
+      td::before {
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: bold;
+      }
+      td:nth-of-type(1)::before { content: "Data"; }
+      td:nth-of-type(2)::before { content: "Unidade"; }
+      td:nth-of-type(3)::before { content: "Itens"; }
+      td:nth-of-type(4)::before { content: "Status"; }
+    }
   </style>
 </head>
 <body>
   <h1>Minhas Coletas</h1>
   <p class="descricao">Aqui estão listadas todas as coletas realizadas pela ONG Unidos pelo Bem em sua empresa. Acompanhe o status e o histórico das coletas realizadas.</p>
 
-  <div class="filtro">
-    <label for="status">Filtrar por status: </label>
-    <select id="status" onchange="filtrarStatus()">
-      <option value="todos">Todos</option>
-      <option value="pendente">Pendente</option>
-      <option value="confirmado">Confirmado</option>
-      <option value="finalizado">Finalizado</option>
-    </select>
+  <div class="filtros">
+    <label>
+      Status:
+      <select id="status" onchange="filtrar()">
+        <option value="todos">Todos</option>
+        <option value="pendente">Pendente</option>
+        <option value="confirmado">Confirmado</option>
+        <option value="finalizado">Finalizado</option>
+      </select>
+    </label>
+    <label>
+      Unidade:
+      <select id="unidade" onchange="filtrar()">
+        <option value="todas">Todas</option>
+        <option value="MATRIZ">MATRIZ</option>
+        <option value="FILIAL RJ">FILIAL RJ</option>
+        <option value="FILIAL MG">FILIAL MG</option>
+        <option value="FILIAL RS">FILIAL RS</option>
+        <option value="FILIAL SP 1-BRAS">FILIAL SP 1-BRAS</option>
+        <option value="FILIAL SP 2-LAPA">FILIAL SP 2-LAPA</option>
+        <option value="FILIAL SP 3-MOEMA">FILIAL SP 3-MOEMA</option>
+      </select>
+    </label>
   </div>
 
   <table>
     <thead>
       <tr>
         <th>Data</th>
-        <th>Endereço</th>
+        <th>Unidade</th>
         <th>Itens</th>
         <th>Status</th>
       </tr>
@@ -43,23 +79,28 @@
 
   <script>
     const coletas = [
-      { data: "10/05/2025", endereco: "Rua das Laranjeiras, 45", itens: "Papelão, Plástico", status: "confirmado" },
-      { data: "18/05/2025", endereco: "Av. São João, 88", itens: "Eletrônicos", status: "finalizado" },
-      { data: "25/05/2025", endereco: "Rua Verde, 123", itens: "Vidros", status: "pendente" },
-      { data: "28/05/2025", endereco: "Rua Azul, 77", itens: "Papel, Metal", status: "confirmado" },
-      { data: "29/05/2025", endereco: "Av. Central, 200", itens: "Lâmpadas", status: "finalizado" },
-      { data: "30/05/2025", endereco: "Rua Amarela, 321", itens: "Baterias, Pilhas", status: "pendente" }
+      { data: "10/05/2025", unidade: "MATRIZ", itens: "Papelão, Plástico", status: "confirmado" },
+      { data: "18/05/2025", unidade: "FILIAL RJ", itens: "Eletrônicos", status: "finalizado" },
+      { data: "25/05/2025", unidade: "FILIAL MG", itens: "Vidros", status: "pendente" },
+      { data: "28/05/2025", unidade: "FILIAL SP 1-BRAS", itens: "Papel, Metal", status: "confirmado" },
+      { data: "29/05/2025", unidade: "FILIAL SP 2-LAPA", itens: "Lâmpadas", status: "finalizado" },
+      { data: "30/05/2025", unidade: "FILIAL SP 3-MOEMA", itens: "Baterias, Pilhas", status: "pendente" },
+      { data: "01/06/2025", unidade: "FILIAL SP 1-BRAS", itens: "Plástico, Alumínio", status: "confirmado" },
+      { data: "02/06/2025", unidade: "FILIAL SP 2-LAPA", itens: "Eletrônicos", status: "finalizado" },
+      { data: "03/06/2025", unidade: "FILIAL SP 3-MOEMA", itens: "Papelão", status: "pendente" }
     ];
 
-    function renderTabela(statusFiltro = "todos") {
+    function renderTabela(statusFiltro = "todos", unidadeFiltro = "todas") {
       const tbody = document.getElementById("tabela-coletas");
       tbody.innerHTML = "";
       coletas.forEach(coleta => {
-        if (statusFiltro === "todos" || coleta.status === statusFiltro) {
+        const statusOk = statusFiltro === "todos" || coleta.status === statusFiltro;
+        const unidadeOk = unidadeFiltro === "todas" || coleta.unidade === unidadeFiltro;
+        if (statusOk && unidadeOk) {
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${coleta.data}</td>
-            <td>${coleta.endereco}</td>
+            <td>${coleta.unidade}</td>
             <td>${coleta.itens}</td>
             <td>${coleta.status.charAt(0).toUpperCase() + coleta.status.slice(1)}</td>
           `;
@@ -68,9 +109,10 @@
       });
     }
 
-    function filtrarStatus() {
+    function filtrar() {
       const status = document.getElementById("status").value;
-      renderTabela(status);
+      const unidade = document.getElementById("unidade").value;
+      renderTabela(status, unidade);
     }
 
     renderTabela();
